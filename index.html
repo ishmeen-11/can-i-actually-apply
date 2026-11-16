@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Can I Actually Apply?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fbf7ef; --card:#fff; --ink:#1f1c17; --muted:#6f685c; --line:#ebe3d3;
+  --sun:#f2b632; --sun-soft:#fdf1d2; --green:#2f8f5b; --green-soft:#e3f3ea;
+  --amber:#c7861a; --amber-soft:#fbefd9; --red:#c2463d; --red-soft:#fbe5e2;
+  --gray-soft:#f1eee8;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#17150f;--card:#211e17;--ink:#f3eee3;--muted:#a69e8e;--line:#353024;
+  --sun-soft:#3a2f14;--green-soft:#173326;--amber-soft:#3a2c12;--red-soft:#3d1c19;--gray-soft:#2a261e}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:28px 20px 60px}
+header{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.logo{width:46px;height:46px;flex:none}
+h1{font:800 32px/1.1 Fraunces,serif;margin:0;letter-spacing:-.5px}
+.sub{color:var(--muted);margin:0 0 22px 60px}
+.grid{display:grid;grid-template-columns:1fr 300px;gap:18px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}.sub{margin-left:0}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+textarea{width:100%;min-height:260px;border:1px solid var(--line);border-radius:12px;padding:12px;font:14px/1.45 Inter,sans-serif;background:var(--bg);color:var(--ink);resize:vertical}
+textarea:focus,input:focus{outline:2px solid var(--sun);border-color:transparent}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+button{font:600 14px Inter,sans-serif;border:0;border-radius:999px;padding:10px 18px;cursor:pointer}
+.primary{background:var(--sun);color:#1f1c17}
+.primary:hover{filter:brightness(1.05)}
+.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+h2{font:600 13px Inter;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 10px}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+input[type=text],input[type=number],select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:14px Inter}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);margin-top:10px}
+.hint{font-size:12px;color:var(--muted)}
+#result{margin-top:18px;display:none}
+.verdict{display:flex;gap:18px;align-items:center;padding:22px;border-radius:16px;position:relative;overflow:hidden}
+.stamp{font:800 30px/1 Fraunces,serif;padding:12px 18px;border:3px solid currentColor;border-radius:12px;transform:rotate(-4deg);white-space:nowrap}
+.v-apply{background:var(--green-soft);color:var(--green)}
+.v-stretch{background:var(--amber-soft);color:var(--amber)}
+.v-skip{background:var(--red-soft);color:var(--red)}
+.vtext{color:var(--ink)}
+.vtext b{font-size:17px}
+.meter{height:10px;background:var(--gray-soft);border-radius:99px;overflow:hidden;margin:10px 0 4px;max-width:340px}
+.meter i{display:block;height:100%;background:currentColor;border-radius:99px;transition:width .8s}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+@media(max-width:860px){.cols{grid-template-columns:1fr}}
+.item{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:0}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700}
+.d-ok{background:var(--green-soft);color:var(--green)}
+.d-mid{background:var(--amber-soft);color:var(--amber)}
+.d-no{background:var(--red-soft);color:var(--red)}
+.d-q{background:var(--gray-soft);color:var(--muted)}
+.why{font-size:13px;color:var(--muted);margin-top:2px}
+.line{font-size:14px}
+.pill{display:inline-block;font-size:12px;padding:3px 10px;border-radius:99px;margin:3px 4px 0 0}
+.flags .pill{font-weight:600}
+.empty{color:var(--muted);font-size:14px}
+.tipbox{margin-top:18px;background:var(--sun-soft);border-radius:14px;padding:14px 16px;font-size:14px}
+.confetti{position:absolute;width:8px;height:12px;top:-14px;border-radius:2px;animation:fall 1.6s ease-in forwards}
+@keyframes fall{to{transform:translateY(220px) rotate(540deg);opacity:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
+      <g fill="#f2b632">
+        <ellipse cx="24" cy="8" rx="5" ry="8"/><ellipse cx="24" cy="40" rx="5" ry="8"/>
+        <ellipse cx="8" cy="24" rx="8" ry="5"/><ellipse cx="40" cy="24" rx="8" ry="5"/>
+        <ellipse cx="12.7" cy="12.7" rx="5" ry="8" transform="rotate(-45 12.7 12.7)"/>
+        <ellipse cx="35.3" cy="35.3" rx="5" ry="8" transform="rotate(-45 35.3 35.3)"/>
+        <ellipse cx="35.3" cy="12.7" rx="5" ry="8" transform="rotate(45 35.3 12.7)"/>
+        <ellipse cx="12.7" cy="35.3" rx="5" ry="8" transform="rotate(45 12.7 35.3)"/>
+      </g>
+      <circle cx="24" cy="24" r="9" fill="#6b4a1e"/>
+    </svg>
+    <h1>Can I Actually Apply?</h1>
+  </header>
+  <p class="sub">Paste a job posting. Find out what's a real requirement and what's just a wishlist.</p>
+
+  <div class="grid">
+    <div>
+      <div class="card">
+        <h2>The job posting</h2>
+        <textarea id="jd" placeholder="Paste the whole posting here, including the Basic and Preferred qualifications sections…"></textarea>
+        <div class="row">
+          <button class="primary" id="go">Decode it ✨</button>
+          <button class="ghost" id="sample">Try a sample</button>
+          <button class="ghost" id="clear">Clear</button>
+        </div>
+      </div>
+      <div id="result"></div>
+    </div>
+
+    <aside class="card">
+      <h2>You</h2>
+      <label>Highest degree</label>
+      <select id="p-degree"><option value="ms">Master's (or finishing one)</option><option value="bs">Bachelor's</option><option value="phd">PhD</option></select>
+      <label>Years coding (Python / SQL)</label>
+      <input type="number" id="p-code" min="0" step="0.5">
+      <label>Years of DS / research experience</label>
+      <input type="number" id="p-exp" min="0" step="0.5">
+      <div class="hint">Internships, RA and research work count. Be fair to yourself.</div>
+      <label>Skills you have (comma separated)</label>
+      <input type="text" id="p-skills">
+      <label>Tools you haven't used yet</label>
+      <input type="text" id="p-gaps">
+      <label class="chk"><input type="checkbox" id="p-pubs"> I have publications</label>
+      <label class="chk"><input type="checkbox" id="p-visa"> I'll need visa sponsorship</label>
+      <div class="row"><button class="ghost" id="reset">Reset to my profile</button></div>
+    </aside>
+  </div>
+</div>
+
+<script>
+const DEFAULTS={
+  degree:"ms", code:5, exp:1.5, pubs:true, visa:true,
+  skills:"Python, SQL, R, C++, Java, JavaScript, PyTorch, TensorFlow, Hugging Face, scikit-learn, pandas, NumPy, machine learning, deep learning, NLP, LLM, RAG, transformers, GNN, CNN, time series, forecasting, statistics, A/B testing, causal inference, experimentation, regression, ETL, feature engineering, BigQuery, MySQL, MongoDB, vector database, AWS, Docker, Git, Linux, CI/CD, FastAPI, Django, REST API, Vertex AI, data visualization, ggplot",
+  gaps:"Spark, Hadoop, Hive, Databricks, Snowflake, Airflow, dbt, Kubernetes, Tableau, Looker, Power BI, SAS, SPSS, Scala, Go"
+};
+const $=id=>document.getElementById(id);
+function store(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function load(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function setProfile(p){$("p-degree").value=p.degree;$("p-code").value=p.code;$("p-exp").value=p.exp;$("p-skills").value=p.skills;$("p-gaps").value=p.gaps;$("p-pubs").checked=p.pubs;$("p-visa").checked=p.visa}
+function getProfile(){return{degree:$("p-degree").value,code:+$("p-code").value||0,exp:+$("p-exp").value||0,skills:$("p-skills").value,gaps:$("p-gaps").value,pubs:$("p-pubs").checked,visa:$("p-visa").checked}}
+let saved=null;try{saved=JSON.parse(load("ciaa-profile"))}catch(e){}
+setProfile(saved||DEFAULTS);
+document.querySelectorAll("aside input,aside select").forEach(el=>el.addEventListener("change",()=>store("ciaa-profile",JSON.stringify(getProfile()))));
+$("reset").onclick=()=>{setProfile(DEFAULTS);store("ciaa-profile",JSON.stringify(DEFAULTS))};
+
+const esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+const list=s=>s.split(",").map(x=>x.trim()).filter(Boolean);
+function hasTerm(text,term){
+  const t=term.toLowerCase();
+  const alias={"hugging face":"hugging ?face","scikit-learn":"scikit|sklearn","a/b testing":"a\\/b|ab test|experiment","statistics":"statistic","machine learning":"machine learning|\\bml\\b","deep learning":"deep learning|neural","llm":"\\bllms?\\b|large language|generative ai|genai","vector database":"vector (db|database|store)|embedding","r":"\\bR\\b","go":"\\bGo(lang)?\\b","rest api":"rest(ful)? api","ci/cd":"ci\\/cd","aws":"\\baws\\b|amazon web services|sagemaker"};
+  const src=alias[t]||("\\b"+esc(term)+"\\b");
+  const flags=(t==="r"||t==="go")?"":"i";
+  return new RegExp(src,flags).test(text);
+}
+
+const REQ_H=/^(basic|minimum|required|requirements|qualifications|must[- ]haves?|what you('|’)ll need|what we('|’)re looking for|you have|who you are|you might be a good fit|about you|skills)/i;
+const PREF_H=/^(preferred|nice[- ]to[- ]haves?|bonus|pluses|ideally|additional|it('|’)s a plus|extra credit|desired)/i;
+const STOP_H=/^(about (the|us)|benefits|compensation|salary|the base|pay range|equal opportunity|why join|perks|our team|about the team|location|job details|recommended jobs)/i;
+const DUTY_H=/^(key (job )?responsibilities|responsibilities|what you('|’)ll do|in this role|the role|your impact|description|day to day)/i;
+
+function splitLines(t){
+  return t.replace(/\r/g,"").split(/\n|•|·|▪|◦/).map(s=>s.replace(/^[\s\-\*–—]+/,"").replace(/^\d{1,2}[.)]\s+/,"").trim()).filter(s=>s.length>2);
+}
+
+function classify(line,p){
+  const L=line.toLowerCase();
+  const skills=list(p.skills),gaps=list(p.gaps);
+  const yrsM=line.match(/(\d+)\s*\+?\s*(?:-|to|–)?\s*(\d+)?\s*\+?\s*years?/i);
+  const yrs=yrsM?+yrsM[1]:null;
+  const out={line,status:"q",why:""};
+  // hard blockers
+  if(/clearance|ts\/sci|secret clearance/i.test(L)){return {...out,status:"no",why:"Security clearance. You can't get one right now, so this is a real blocker.",hard:true}}
+  if(/u\.?s\.? citizen(ship)? (is )?required|must be a u\.?s\.? citizen/i.test(L)){return {...out,status:"no",why:"Requires US citizenship.",hard:true}}
+  // degree
+  if(/ph\.?d|doctor/i.test(L)&&!/master|m\.?s\.?\b|or equivalent|or (a )?related experience/i.test(L)&&!/or (a )?master/i.test(L)){
+    if(p.degree==="phd")return {...out,status:"ok",why:"You have it."};
+    return {...out,status:"no",why:"PhD only, with no Master's alternative.",hard:true};
+  }
+  if(/ph\.?d/i.test(L)&&/master/i.test(L)){
+    return {...out,status:p.degree==="bs"?"mid":"ok",why:"PhD <b>or</b> Master's, and the Master's counts."+(yrs?" They may want some years on top, see below.":"")};
+  }
+  if(/master|m\.?s\.? degree|graduate degree/i.test(L)) return {...out,status:p.degree==="bs"?"mid":"ok",why:p.degree==="bs"?"They want a Master's. Apply anyway if they say \"or equivalent experience\".":"Your Master's covers it."};
+  if(/bachelor|b\.?s\.?\b|undergraduate|degree in/i.test(L)) return {...out,status:"ok",why:"Degree covered."};
+  // publications
+  if(/publication|research paper|peer[- ]reviewed|papers?\b|conferences?/i.test(L)) return {...out,status:p.pubs?"ok":"mid",why:p.pubs?"Your papers count here. Most applicants don't have this.":"No publications yet. Research projects can partly cover it."};
+  // years
+  if(yrs!==null){
+    const codey=/sql|python|scripting|programming|coding|querying|r,|statistical software|software development/i.test(L)&&!/scientist|analyst|industry|professional|internet/i.test(L);
+    const have=codey?p.code:p.exp;
+    const what=codey?"coding":"DS/research experience";
+    if(have>=yrs) return {...out,status:"ok",why:`Wants ${yrs}+ years of ${what}. You have ${have}.`};
+    if(yrs-have<=1.5) return {...out,status:"mid",why:`Wants ${yrs}+ years and you have ${have}. That's close enough. Companies bend on years more than anything else.`};
+    if(yrs>=5) return {...out,status:"no",why:`${yrs}+ years is a senior-level ask. You're probably not who they're looking for.`,hard:yrs>=6};
+    return {...out,status:"mid",why:`Wants ${yrs}+ years and you have ${have}. It's a stretch, so lead with your strongest project.`};
+  }
+  // skills
+  const hit=skills.filter(s=>hasTerm(line,s));
+  const miss=gaps.filter(s=>hasTerm(line,s));
+  if(hit.length&&!miss.length) return {...out,status:"ok",why:"You have: "+hit.slice(0,5).join(", ")};
+  if(hit.length&&miss.length) return {...out,status:/\bor\b|e\.g\.|such as|similar/i.test(L)?"ok":"mid",why:`You have ${hit.slice(0,4).join(", ")}. Not yet: ${miss.join(", ")}`+(/\bor\b|e\.g\.|such as|similar/i.test(L)?". It says \"or\", so you're covered.":".")};
+  if(miss.length) return {...out,status:"mid",why:"Not yet: "+miss.join(", ")+". Learnable, and worth mentioning you're picking it up."};
+  if(/quantitative analys|data[- ]driven|business problems|evaluat\w* (ai|ml|models?)|ai systems|model evaluation|analytical/i.test(L)) return {...out,status:"ok",why:"Your forecasting, model evaluation and research projects cover this."};
+  if(/communicat|collaborat|stakeholder|team|self[- ]starter|curious|ambigu|fast[- ]paced/i.test(L)) return {...out,status:"ok",why:"Soft skill. Your Deloitte presentations and NSDC mentoring cover it."};
+  return {...out,status:"q",why:"Couldn't auto-check this one. Read it yourself."};
+}
+
+function decode(){
+  const text=$("jd").value.trim();
+  const p=getProfile();
+  if(!text){$("result").style.display="none";return}
+  const lines=splitLines(text);
+  let mode=null,sawHeaders=false;const req=[],pref=[];
+  for(const l of lines){
+    const short=l.length<70;
+    if(short&&PREF_H.test(l)){mode="pref";sawHeaders=true;continue}
+    if(short&&REQ_H.test(l)){mode="req";sawHeaders=true;continue}
+    if(short&&(STOP_H.test(l)||DUTY_H.test(l))){mode=null;continue}
+    if(/equal opportunity|accommodation|base salary|annually|inclusive culture|benefits include|\bUSD\b|recommended jobs/i.test(l)){mode=null;continue}
+    if(mode==="req")req.push(l); else if(mode==="pref")pref.push(l);
+  }
+  if(!sawHeaders){ // fallback: guess from keywords
+    for(const l of lines){ if(!/years?|degree|experience|proficien|knowledge|familiar|skill/i.test(l))continue;
+      (/prefer|nice to have|bonus|plus|ideally/i.test(l)?pref:req).push(l)}
+  }
+  const filt=a=>a.filter(l=>l.length>12&&l.length<600);
+  const R=filt(req).map(l=>classify(l,p)), P=filt(pref).map(l=>{const c=classify(l,p);return c.status==="no"?{...c,status:"q",hard:false,why:"Wishlist item. It doesn't count against you."}:c});
+
+  // flags across the whole posting
+  const flags=[];
+  const noSpons=/(unable|not able|cannot|can('|’)t|will not|won('|’)t|does not|do not) (to )?(provide |offer )?(sponsor|sponsorship)|without (the need for )?(current or future )?sponsorship|no visa sponsorship/i.test(text);
+  const yesSpons=/visa sponsorship (is )?available|will sponsor|sponsorship (is )?(available|provided)/i.test(text);
+  if(p.visa){
+    if(noSpons) flags.push(["no","Says no visa sponsorship"]);
+    else if(yesSpons) flags.push(["ok","Mentions sponsorship is available"]);
+    else flags.push(["q","Nothing said about sponsorship, which is normal. Ask the recruiter."]);
+  }
+  if(/new grad|university grad|early career|recent grad|class of 20/i.test(text.slice(0,1500))) flags.push(["ok","Built for new grads"]);
+  if(/\b(senior|staff|principal|lead)\b/i.test(text.split("\n").slice(0,8).join(" "))) flags.push(["mid","Title looks senior"]);
+  if(/ph\.?d/i.test(pref.join(" "))&&!R.some(r=>/ph\.?d/i.test(r.line))) flags.push(["ok","PhD is only <b>preferred</b>. Ignore it."]);
+
+  const counted=R.filter(r=>r.status!=="q");
+  const pts=counted.reduce((s,r)=>s+(r.status==="ok"?1:r.status==="mid"?0.5:0),0);
+  const score=counted.length?Math.round(pts/counted.length*100):0;
+  const bonus=P.filter(r=>r.status==="ok").length;
+  const hard=R.some(r=>r.hard)||(p.visa&&noSpons);
+
+  let v,cls,msg;
+  if(!R.length&&!P.length){v="Hmm?";cls="v-stretch";msg="<b>Couldn't find the qualifications.</b><br>Make sure you pasted the requirements section too.";}
+  else if(hard){v="Skip";cls="v-skip";msg="<b>There's a real blocker here.</b><br>"+(p.visa&&noSpons?"They won't sponsor a visa. ":"")+"Save your energy for a role that wants you back.";}
+  else if(score>=70){v="Apply!";cls="v-apply";msg=`<b>You meet ${score}% of the real requirements</b>${bonus?` and ${bonus} of the nice-to-haves`:""}.<br>This is a solid match. Send it, and get a referral if you can.`;}
+  else if(score>=45){v="Apply anyway";cls="v-stretch";msg=`<b>${score}% of the real requirements.</b><br>Most people who get hired don't hit 100%. If the gaps are only "years", go for it.`;}
+  else{v="Long shot";cls="v-skip";msg=`<b>${score}% of the real requirements.</b><br>Apply only with a referral, otherwise move on. It's not you, it's the fit.`;}
+
+  const dot={ok:["d-ok","✓"],mid:["d-mid","~"],no:["d-no","✕"],q:["d-q","?"]};
+  const items=a=>a.length?a.map(r=>`<div class="item"><div class="dot ${dot[r.status][0]}">${dot[r.status][1]}</div><div><div class="line">${escapeHtml(r.line)}</div><div class="why">${r.why}</div></div></div>`).join(""):`<div class="empty">Nothing found in this section.</div>`;
+  const pillCls={ok:"d-ok",mid:"d-mid",no:"d-no",q:"d-q"};
+  $("result").innerHTML=`
+    <div class="verdict ${cls}" id="vbox">
+      <div class="stamp">${v}</div>
+      <div class="vtext">${msg}<div class="meter" style="color:inherit"><i style="width:0"></i></div>
+      <div class="flags">${flags.map(f=>`<span class="pill ${pillCls[f[0]]}">${f[1]}</span>`).join("")}</div></div>
+    </div>
+    <div class="cols">
+      <div class="card"><h2>Must-haves · these count</h2>${items(R)}</div>
+      <div class="card"><h2>Nice-to-haves · wishlist</h2>${items(P)}</div>
+    </div>
+    <div class="tipbox">💡 <b>Remember:</b> "Preferred" means optional. Companies write their dream candidate into the posting and then hire real people. If you meet most of the must-haves, apply.</div>`;
+  $("result").style.display="block";
+  requestAnimationFrame(()=>{const m=document.querySelector(".meter i");if(m)m.style.width=score+"%"});
+  if(cls==="v-apply")confetti();
+  $("result").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function escapeHtml(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function confetti(){const box=$("vbox");const cols=["#f2b632","#2f8f5b","#e8794a","#6b4a1e","#f7d77a"];
+  for(let i=0;i<40;i++){const c=document.createElement("i");c.className="confetti";c.style.left=Math.random()*100+"%";c.style.background=cols[i%cols.length];c.style.animationDelay=Math.random()*.5+"s";box.appendChild(c);setTimeout(()=>c.remove(),2400)}}
+
+const SAMPLE=`Data Scientist, Growth (New Grad)
+Brightloop · New York, NY
+
+What you'll do
+- Build forecasting and experimentation models that shape how we grow
+- Partner with product and engineering to define metrics
+
+Basic Qualifications
+- Master's degree in Statistics, Computer Science, Data Science or a related field
+- 1+ years of experience with SQL and Python
+- 2+ years of experience as a data scientist or quantitative analyst
+- Experience with A/B testing and statistical inference
+- Strong communication skills with technical and non-technical stakeholders
+
+Preferred Qualifications
+- PhD in a quantitative field
+- Experience with Spark or Airflow
+- Publications in ML or statistics venues
+- Experience with time series forecasting
+
+Benefits
+- Health, dental, vision`;
+$("sample").onclick=()=>{$("jd").value=SAMPLE;decode()};
+$("clear").onclick=()=>{$("jd").value="";$("result").style.display="none"};
+$("go").onclick=decode;
+</script>
+</body>
+</html>
