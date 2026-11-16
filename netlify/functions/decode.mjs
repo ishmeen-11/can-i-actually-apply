@@ -1,6 +1,5 @@
-// Netlify function: sends a job posting + the user's profile to Claude and
+// Netlify function: sends a job posting + the user's profile to an LLM (Groq or Gemini) and
 // returns a structured, line-by-line requirements check as JSON.
-const MODEL = process.env.ANTHROPIC_MODEL || "claude-haiku-5-5";
 const MAX_CHARS = 20000;
 
 const SYSTEM = `You are a blunt, kind career coach for new-grad data scientists.
@@ -25,33 +24,22 @@ Return ONLY JSON, no prose, matching:
 
 export default async (req) => {
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return json({ error: "ANTHROPIC_API_KEY is not set on Netlify" }, 500);
+  const groq = process.env.GROQ_API_KEY, gemini = process.env.GEMINI_API_KEY;
+  if (!groq && !gemini) return json({ error: "Set GROQ_API_KEY or GEMINI_API_KEY on Netlify" }, 500);
 
   let body;
   try { body = await req.json(); } catch { return json({ error: "Bad JSON" }, 400); }
   const posting = String(body.posting || "").slice(0, MAX_CHARS);
   if (posting.length < 50) return json({ error: "Posting too short" }, 400);
   const profile = JSON.stringify(body.profile || {}).slice(0, 4000);
+  const user = `CANDIDATE PROFILE:\n${profile}\n\nJOB POSTING:\n${posting}`;
 
-  const r = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key": key,
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 2500,
-      system: SYSTEM,
-      messages: [{ role: "user", content: `CANDIDATE PROFILE:\n${profile}\n\nJOB POSTING:\n${posting}` }],
-    }),
-  });
-  if (!r.ok) return json({ error: `LLM error ${r.status}`, detail: (await r.text()).slice(0, 300) }, 502);
-
-  const data = await r.json();
-  const text = (data.content || []).map((c) => c.text || "").join("");
+  let text;
+  try {
+    text = groq ? await callGroq(groq, user) : await callGemini(gemini, user);
+  } catch (e) {
+    return json({ error: String(e.message || e).slice(0, 300) }, 502);
+  }
   const match = text.match(/\{[\s\S]*\}/);
   try {
     return json(JSON.parse(match ? match[0] : text));
@@ -59,6 +47,38 @@ export default async (req) => {
     return json({ error: "Could not parse model output" }, 502);
   }
 };
+
+async function callGroq(key, user) {
+  const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
+    body: JSON.stringify({
+      model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+      temperature: 0.2,
+      response_format: { type: "json_object" },
+      messages: [{ role: "system", content: SYSTEM }, { role: "user", content: user }],
+    }),
+  });
+  if (!r.ok) throw new Error(`Groq ${r.status}: ${(await r.text()).slice(0, 200)}`);
+  const d = await r.json();
+  return d.choices?.[0]?.message?.content || "";
+}
+
+async function callGemini(key, user) {
+  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+    method: "POST",
+    headers: { "x-goog-api-key": key, "content-type": "application/json" },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: SYSTEM }] },
+      contents: [{ role: "user", parts: [{ text: user }] }],
+      generationConfig: { temperature: 0.2, responseMimeType: "application/json" },
+    }),
+  });
+  if (!r.ok) throw new Error(`Gemini ${r.status}: ${(await r.text()).slice(0, 200)}`);
+  const d = await r.json();
+  return (d.candidates?.[0]?.content?.parts || []).map((p) => p.text || "").join("");
+}
 
 const json = (obj, status = 200) =>
   new Response(JSON.stringify(obj), { status, headers: { "content-type": "application/json" } });

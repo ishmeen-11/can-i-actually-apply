@@ -16,9 +16,13 @@ Built by [Ishmeen Garewal](https://ishmeen-11.github.io/Ishmeen-Portfolio/).
 
 ## Smart mode (AI)
 
-On Netlify, a serverless function (`netlify/functions/decode.mjs`) sends the posting and your profile to Claude, which reads each requirement line and returns a structured check (meets / partial / missing / blocker) along with a one-line "your angle" tip. If the function isn't available, the page falls back to the built-in rule-based parser.
+On Netlify, a serverless function (`netlify/functions/decode.mjs`) sends the posting and your profile to an LLM, which reads each requirement line and returns a structured check (meets / partial / missing / blocker) along with a one-line "your angle" tip. If the function isn't available, the page falls back to the built-in rule-based parser.
 
-**Setup:** in Netlify, go to Site configuration → Environment variables and add `ANTHROPIC_API_KEY`. You can optionally set `ANTHROPIC_MODEL` too (the default is `claude-haiku-5-5`).
+**Setup:** in Netlify, go to Site configuration → Environment variables and add **one** of these:
+- `GROQ_API_KEY` (free tier at console.groq.com). Optionally set `GROQ_MODEL`; the default is `llama-3.3-70b-versatile`.
+- `GEMINI_API_KEY` (free tier at aistudio.google.com). Optionally set `GEMINI_MODEL`; the default is `gemini-2.5-flash`.
+
+If both are set, Groq is used.
 
 ## Run locally
 
